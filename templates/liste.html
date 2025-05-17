@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Étudiants{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2 mb-4">
+            <i class="fas fa-users me-2 text-primary"></i>Liste des Étudiants
+        </h1>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('main.ajouter') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Ajouter un étudiant
+        </a>
+    </div>
+</div>
+
+<!-- Recherche avancée -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            <i class="fas fa-search me-2"></i>Recherche
+        </h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('main.index') }}" method="get">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="id_etudiant" class="form-label">ID</label>
+                    <input type="number" class="form-control" id="id_etudiant" name="id_etudiant" value="{{ recherche.id_etudiant }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="mot_cle" class="form-label">Mot-clé (Nom/Prénom)</label>
+                    <input type="text" class="form-control" id="mot_cle" name="mot_cle" value="{{ recherche.mot_cle }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="date_debut" class="form-label">Date début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut" value="{{ recherche.date_debut }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="date_fin" class="form-label">Date fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ recherche.date_fin }}">
+                </div>
+                <div class="col-12 text-end">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-secondary me-2">
+                        <i class="fas fa-undo me-1"></i>Réinitialiser
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Rechercher
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste des étudiants -->
+<div class="card">
+    <div class="card-body">
+        {% if etudiants %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Note</th>
+                            <th>Date d'ajout</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for etudiant in etudiants %}
+                            <tr>
+                                <td>{{ etudiant.id }}</td>
+                                <td>{{ etudiant.nom }}</td>
+                                <td>{{ etudiant.prenom }}</td>
+                                <td>{{ etudiant.email }}</td>
+                                <td>
+                                    {% if etudiant.note is not none %}
+                                        <span class="badge bg-{{ 'success' if etudiant.note >= 10 else 'danger' }}">
+                                            {{ etudiant.note }}/20
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Non évalué</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ etudiant.date_ajout.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('main.modifier', etudiant_id=etudiant.id) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-outline-danger" 
+                                           onclick="confirmerSuppression({{ etudiant.id }}, '{{ etudiant.prenom }} {{ etudiant.nom }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3">
+                <p class="text-muted">{{ etudiants|length }} étudiant(s) trouvé(s)</p>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>Aucun étudiant trouvé</h4>
+                <p class="text-muted">Modifiez vos critères de recherche ou ajoutez de nouveaux étudiants.</p>
+                <a href="{{ url_for('main.ajouter') }}" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus me-1"></i>Ajouter un étudiant
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="modalSuppression" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'étudiant <strong id="nom-etudiant"></strong> ?</p>
+                <p class="text-danger">Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="#" id="btn-confirmer-suppression" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i>Supprimer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmerSuppression(id, nom) {
+        document.getElementById('nom-etudiant').textContent = nom;
+        document.getElementById('btn-confirmer-suppression').href = "{{ url_for('main.supprimer', etudiant_id=0) }}".replace('0', id);
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalSuppression'));
+        modal.show();
+    }
+</script>
+{% endblock %}
