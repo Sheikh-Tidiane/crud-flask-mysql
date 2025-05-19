@@ -1,15 +1,21 @@
 from flask import Flask
 from routes import main
 
-
 def create_app():
     """Initialisation de l'application Flask."""
     app = Flask(__name__)
     app.config['SECRET_KEY'] = ' ' 
     
-    
     # Enregistrement des blueprints
     app.register_blueprint(main)
+
+    # Ajout des headers pour empêcher la mise en cache
+    @app.after_request
+    def add_header(response):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     
     return app
 

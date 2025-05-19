@@ -5,8 +5,8 @@ from mysql.connector import Error
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'DIOP',
-    'database': 'flask_db', 
+    'password': 'programmation',
+    'database': 'flask_db',
 }
 
 def creer_connexion():
@@ -20,9 +20,13 @@ def creer_connexion():
         print(f"Erreur de connexion à MySQL: {e}")
         return None
 
-
 def fermer_connexion(connexion):
     """Ferme la connexion à la base de données."""
     if connexion and connexion.is_connected():
         connexion.close()
         print("Connexion fermée")
+
+# ✅ Fonction attendue par requetes.py
+def get_connection():
+    """Alias pour compatibilité avec les autres modules."""
+    return creer_connexion()

@@ -1,5 +1,6 @@
 from mysql.connector import Error
 from db import creer_connexion, fermer_connexion
+from db import get_connection 
 
 def lister_etudiants():
     """Récupère tous les étudiants de la base de données."""
@@ -145,3 +146,48 @@ def rechercher_etudiants(mot_cle=None, id_etudiant=None, date_debut=None, date_f
             fermer_connexion(connexion)
     
     return etudiants
+def get_user_by_email(email):
+    connexion = creer_connexion()
+    user = None
+    
+    if connexion:
+        try:
+            cursor = connexion.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+            cursor.close()
+        except Error as e:
+            print(f"Erreur lors de la récupération de l'utilisateur: {e}")
+        finally:
+            fermer_connexion(connexion)
+    
+    return user
+
+def ajouter_utilisateur(username, email, password_hash):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO users (username, email, password_hash) VALUES (%s, %s, %s)",
+            (username, email, password_hash)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Erreur lors de l'ajout de l'utilisateur : {e}")
+        return False
+
+def get_user_by_email(email):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return user
+    except Exception as e:
+        print(f"Erreur lors de la récupération de l'utilisateur : {e}")
+        return None
