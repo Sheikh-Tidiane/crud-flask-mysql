@@ -115,7 +115,6 @@ def rechercher_etudiants(mot_cle=None, id_etudiant=None, date_debut=None, date_f
         try:
             cursor = connexion.cursor(dictionary=True)
             
-            # Construction de la requête dynamique
             conditions = []
             parametres = []
             

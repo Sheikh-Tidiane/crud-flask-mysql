@@ -9,8 +9,7 @@ def create_app():
     # Enregistrement des blueprints
     app.register_blueprint(main)
 
-    # Ajout des headers pour empêcher la mise en cache
-    @app.after_request
+     @app.after_request
     def add_header(response):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
         response.headers["Pragma"] = "no-cache"
